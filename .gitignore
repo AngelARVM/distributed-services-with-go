@@ -6,6 +6,7 @@
 
 /dist/
 /bin/
+/tmp/
 
 *.out
 *.test

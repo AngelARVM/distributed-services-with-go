@@ -1,6 +1,6 @@
 PROTOC_GEN_GO := $(CURDIR)/bin/protoc-gen-go
 
-.PHONY: compile test
+.PHONY: compile test dev
 
 compile: $(PROTOC_GEN_GO)
 	PATH="$(CURDIR)/bin:$$PATH" protoc api/v1/*.proto \
@@ -13,3 +13,6 @@ $(PROTOC_GEN_GO):
 
 test:
 	go test -race ./...
+
+dev:
+	air -c .air.toml
