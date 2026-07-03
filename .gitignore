@@ -7,7 +7,7 @@
 /dist/
 /bin/
 /tmp/
-
+/.gocache/
 *.out
 *.test
 *.prof
