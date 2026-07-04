@@ -17,8 +17,6 @@ service Log {
   rpc ConsumeStream(ConsumeRequest) returns (stream ConsumeResponse) {}
 
   rpc ProduceStream(stream ProduceRequest) returns (stream ProduceResponse) {}
-
-
 }
 
 message ProduceRequest {

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	api "github.com/angelarvm/prolog/api/v1"
+	"google.golang.org/grpc"
 )
 
 type Config struct {
@@ -15,6 +16,16 @@ var _ api.LogServer = (*grpcServer)(nil)
 type grpcServer struct {
 	api.UnimplementedLogServer
 	*Config
+}
+
+func NewGRPCServer(config *Config) (*grpc.Server, error) {
+	gsrv := grpc.NewServer()
+	srv, err := newgrpcServer(config)
+	if err != nil {
+		return nil, err
+	}
+	api.RegisterLogServer(gsrv, srv)
+	return gsrv, nil
 }
 
 func newgrpcServer(config *Config) (srv *grpcServer, err error) {
@@ -42,7 +53,7 @@ func (s *grpcServer) Consume(ctx context.Context, req *api.ConsumeRequest) (*api
 	return &api.ConsumeResponse{Record: record}, nil
 }
 
-func (s *grpcServer) ProduceStream(ctx context.Context, stream api.Log_ProduceStreamServer) error {
+func (s *grpcServer) ProduceStream(stream api.Log_ProduceStreamServer) error {
 	for {
 		req, err := stream.Recv()
 		if err != nil {
@@ -59,7 +70,7 @@ func (s *grpcServer) ProduceStream(ctx context.Context, stream api.Log_ProduceSt
 	}
 }
 
-func (s *grpcServer) ConsumeStream(ctx context.Context, req *api.ConsumeRequest, stream api.Log_ConsumeStreamServer) error {
+func (s *grpcServer) ConsumeStream(req *api.ConsumeRequest, stream api.Log_ConsumeStreamServer) error {
 	for {
 		select {
 		case <-stream.Context().Done():
@@ -79,4 +90,9 @@ func (s *grpcServer) ConsumeStream(ctx context.Context, req *api.ConsumeRequest,
 			req.Offset++
 		}
 	}
+}
+
+type CommitLog interface {
+	Append(*api.Record) (uint64, error)
+	Read(uint64) (*api.Record, error)
 }
