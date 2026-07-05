@@ -1,0 +1,17 @@
+{
+  "CN": "client",
+  "hosts": [""],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "AR",
+      "L": "CO",
+      "ST": "Corrientes",
+      "O": "Learning GO",
+      "OU": "Distributed Services"
+    }
+  ]
+}
