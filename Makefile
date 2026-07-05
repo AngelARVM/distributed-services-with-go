@@ -1,7 +1,9 @@
 PROTOC_GEN_GO := $(CURDIR)/bin/protoc-gen-go
 PROTOC_GEN_GO_GRPC := $(CURDIR)/bin/protoc-gen-go-grpc
+CFSSL := $(CURDIR)/bin/cfssl
+CFSSLJSON := $(CURDIR)/bin/cfssljson
 
-.PHONY: compile test dev generate-tools
+.PHONY: compile test dev generate-tools generate-cert-tools init gencert
 
 compile: generate-tools
 	protoc api/v1/*.proto \
@@ -27,3 +29,27 @@ test:
 
 dev:
 	air -c .air.toml
+
+CONFIG_PATH=${HOME}/.prolog/
+
+.PHONY: init
+init:
+	mkdir -p ${CONFIG_PATH}
+
+generate-cert-tools: $(CFSSL) $(CFSSLJSON)
+
+$(CFSSL):
+	go build -o $(CFSSL) github.com/cloudflare/cfssl/cmd/cfssl
+
+$(CFSSLJSON):
+	go build -o $(CFSSLJSON) github.com/cloudflare/cfssl/cmd/cfssljson
+
+gencert: generate-cert-tools
+	$(CFSSL) gencert \
+		-initca test/ca-csr.json | $(CFSSLJSON) -bare ca
+	$(CFSSL) gencert \
+		-ca=ca.pem \
+		-ca-key=ca-key.pem \
+		-config=test/ca-config.json \
+		-profile=server \
+		test/server-csr.json | $(CFSSLJSON) -bare server
