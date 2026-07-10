@@ -57,8 +57,8 @@ func New(config Config) (*Agent, error) {
 	}
 	setup := []func() error{
 		a.setupLogger,
-		a.setupServer,
 		a.setupLog,
+		a.setupServer,
 		a.setupMembership,
 	}
 

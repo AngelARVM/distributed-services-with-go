@@ -3,7 +3,7 @@ PROTOC_GEN_GO_GRPC := $(CURDIR)/bin/protoc-gen-go-grpc
 CFSSL := $(CURDIR)/bin/cfssl
 CFSSLJSON := $(CURDIR)/bin/cfssljson
 
-.PHONY: compile test dev generate-tools generate-cert-tools init gencert
+.PHONY: compile test dev generate-tools generate-cert-tools init gencert gencerts
 
 compile: generate-tools
 	protoc api/v1/*.proto \
@@ -59,7 +59,7 @@ gencert: generate-cert-tools
 		-config=test/ca-config.json \
 		-profile=client \
 		-cn="root" \
-		test/client-csr.json | cfssljson -bare root-client
+		test/client-csr.json | $(CFSSLJSON) -bare root-client
 
 	$(CFSSL) gencert \
 	  -ca=ca.pem \
@@ -67,7 +67,9 @@ gencert: generate-cert-tools
 		-config=test/ca-config.json \
 		-profile=client \
 		-cn="nobody" \
-		test/client-csr.json | cfssljson -bare nobody-client
+		test/client-csr.json | $(CFSSLJSON) -bare nobody-client
+
+gencerts: gencert
 
 $(CONFIG_PATH)/model.conf:
 	cp test/model.conf $(CONFIG_PATH)/model.conf
@@ -75,4 +77,3 @@ $(CONFIG_PATH)/model.conf:
 
 $(CONFIG_PATH)/policy.csv:
 	cp test/policy.csv $(CONFIG_PATH)/policy.csv
-
